@@ -18,8 +18,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
 });
 
-// Protected routes (session-based authentication)
-Route::middleware('auth:web')->group(function () {
+// Protected routes (JWT authentication)
+Route::middleware('auth:api')->group(function () {
 
     // Authentication routes
     Route::prefix('auth')->group(function () {
