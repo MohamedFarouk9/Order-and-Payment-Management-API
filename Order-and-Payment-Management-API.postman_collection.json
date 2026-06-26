@@ -1,0 +1,616 @@
+{
+  "info": {
+    "name": "Order and Payment Management API",
+    "description": "Postman collection for Order and Payment Management API. Includes Authentication, Orders, and Payments endpoints with request and response examples.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Smith\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"secret123\",\n  \"password_confirmation\": \"secret123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"Alice Smith\",\n      \"email\": \"alice@example.com\"\n    },\n    \"token\": \"eyJ0eXAiOiJKV1QiLC...\"\n  }\n}"
+            },
+            {
+              "name": "Validation Error",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"message\": \"The email has already been taken.\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.token) {",
+                  "    pm.environment.set('token', json.data.token);",
+                  "    console.log('JWT token saved to environment variable token');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"secret123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"Alice Smith\",\n      \"email\": \"alice@example.com\"\n    },\n    \"token\": \"eyJ0eXAiOiJKV1QiLC...\",\n    \"expires_in\": 3600\n  }\n}"
+            },
+            {
+              "name": "Invalid Credentials",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"message\": \"Invalid credentials\",\n  \"error\": \"Email or password is incorrect\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.token) {",
+                  "    pm.environment.set('token', json.data.token);",
+                  "    console.log('JWT token saved to environment variable token');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Alice Smith\",\n    \"email\": \"alice@example.com\",\n    \"created_at\": \"2026-01-01T12:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Token refreshed successfully\",\n  \"data\": {\n    \"token\": \"eyJ0eXAiOiJKV1QiLC...\",\n    \"expires_in\": 3600\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.token) {",
+                  "    pm.environment.set('token', json.data.token);",
+                  "    console.log('JWT token refreshed and saved to environment variable token');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Logout successful\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?per_page=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"],
+              "query": [
+                { "key": "per_page", "value": "10" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Orders retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"status\": \"pending\",\n      \"total_amount\": 49.98,\n      \"items_count\": 2,\n      \"notes\": \"Please deliver after 5pm\",\n      \"created_at\": \"2026-01-01T12:00:00Z\",\n      \"updated_at\": \"2026-01-01T12:00:00Z\",\n      \"items\": [\n        {\n          \"id\": 1,\n          \"product_name\": \"Widget\",\n          \"quantity\": 2,\n          \"price\": 19.99,\n          \"subtotal\": 39.98\n        }\n      ],\n      \"payments\": []\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Leave package at security,\",\n  \"items\": [\n    {\n      \"product_name\": \"Widget\",\n      \"quantity\": 2,\n      \"price\": 19.99\n    },\n    {\n      \"product_name\": \"Gadget\",\n      \"quantity\": 1,\n      \"price\": 9.99\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            }
+          },
+          "response": [
+            {
+              "name": "Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"message\": \"Order created successfully\",\n  \"data\": {\n    \"id\": 2,\n    \"status\": \"pending\",\n    \"total_amount\": 49.97,\n    \"items_count\": 3,\n    \"notes\": \"Leave package at security,\",\n    \"created_at\": \"2026-01-01T12:00:00Z\",\n    \"updated_at\": \"2026-01-01T12:00:00Z\",\n    \"items\": [\n      {\n        \"id\": 2,\n        \"product_name\": \"Widget\",\n        \"quantity\": 2,\n        \"price\": 19.99,\n        \"subtotal\": 39.98\n      },\n      {\n        \"id\": 3,\n        \"product_name\": \"Gadget\",\n        \"quantity\": 1,\n        \"price\": 9.99,\n        \"subtotal\": 9.99\n      }\n    ],\n    \"payments\": []\n  }\n}"
+            },
+            {
+              "name": "Validation Error",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"message\": \"The items field is required.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Order retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"confirmed\",\n    \"total_amount\": 49.98,\n    \"items_count\": 2,\n    \"notes\": \"Deliver after 5pm\",\n    \"created_at\": \"2026-01-01T12:00:00Z\",\n    \"updated_at\": \"2026-01-01T12:30:00Z\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"product_name\": \"Widget\",\n        \"quantity\": 2,\n        \"price\": 19.99,\n        \"subtotal\": 39.98\n      }\n    ],\n    \"payments\": [\n      {\n        \"id\": 1,\n        \"order_id\": 1,\n        \"payment_method\": \"credit_card\",\n        \"status\": \"successful\",\n        \"amount\": 49.98,\n        \"idempotency_key\": \"abc123-uuid\",\n        \"gateway_transaction_id\": \"txn_123456\",\n        \"failure_reason\": null,\n        \"processed_at\": \"2026-01-01T12:31:00Z\",\n        \"created_at\": \"2026-01-01T12:30:00Z\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Change delivery instructions,\",\n  \"items\": [\n    {\n      \"product_name\": \"Widget\",\n      \"quantity\": 3,\n      \"price\": 19.99\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Order updated successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"pending\",\n    \"total_amount\": 59.97,\n    \"items_count\": 3,\n    \"notes\": \"Change delivery instructions,\",\n    \"created_at\": \"2026-01-01T12:00:00Z\",\n    \"updated_at\": \"2026-01-01T12:10:00Z\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"product_name\": \"Widget\",\n        \"quantity\": 3,\n        \"price\": 19.99,\n        \"subtotal\": 59.97\n      }\n    ],\n    \"payments\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Confirm Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/1/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1", "confirm"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Order confirmed successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"confirmed\",\n    \"total_amount\": 59.97,\n    \"items_count\": 3,\n    \"notes\": \"Change delivery instructions,\",\n    \"created_at\": \"2026-01-01T12:00:00Z\",\n    \"updated_at\": \"2026-01-01T12:11:00Z\",\n    \"items\": [],\n    \"payments\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Order deleted successfully\"\n}"
+            },
+            {
+              "name": "Order Has Payments",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"message\": \"Deletion failed\",\n  \"error\": \"Cannot delete orders with associated payments\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Process Credit Card Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_method\": \"credit_card\",\n  \"amount\": 59.97,\n  \"details\": {\n    \"card_number\": \"4111111111111111\",\n    \"card_holder\": \"Alice Smith\",\n    \"expiry\": \"12/25\",\n    \"cvv\": \"123\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/1/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1", "payments"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"message\": \"Payment processed successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"order_id\": 1,\n    \"payment_method\": \"credit_card\",\n    \"status\": \"successful\",\n    \"amount\": 59.97,\n    \"idempotency_key\": \"abc123-uuid\",\n    \"gateway_transaction_id\": \"txn_123456\",\n    \"failure_reason\": null,\n    \"processed_at\": \"2026-01-01T12:35:00Z\",\n    \"created_at\": \"2026-01-01T12:31:00Z\"\n  }\n}"
+            },
+            {
+              "name": "Order Not Confirmed",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"message\": \"Payment processing error\",\n  \"error\": \"Only confirmed orders can be paid\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Process PayPal Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_method\": \"paypal\",\n  \"amount\": 59.97,\n  \"details\": {\n    \"email\": \"alice@example.com\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/1/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1", "payments"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"message\": \"Payment processed successfully\",\n  \"data\": {\n    \"id\": 2,\n    \"order_id\": 1,\n    \"payment_method\": \"paypal\",\n    \"status\": \"successful\",\n    \"amount\": 59.97,\n    \"idempotency_key\": \"def456-uuid\",\n    \"gateway_transaction_id\": \"txn_654321\",\n    \"failure_reason\": null,\n    \"processed_at\": \"2026-01-01T12:45:00Z\",\n    \"created_at\": \"2026-01-01T12:44:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Order Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/1/payments?status=successful",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1", "payments"],
+              "query": [
+                { "key": "status", "value": "successful" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Payments retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"order_id\": 1,\n      \"payment_method\": \"credit_card\",\n      \"status\": \"successful\",\n      \"amount\": 59.97,\n      \"idempotency_key\": \"abc123-uuid\",\n      \"gateway_transaction_id\": \"txn_123456\",\n      \"failure_reason\": null,\n      \"processed_at\": \"2026-01-01T12:35:00Z\",\n      \"created_at\": \"2026-01-01T12:31:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "List All Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments?per_page=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"],
+              "query": [
+                { "key": "per_page", "value": "10" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Payments retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"order_id\": 1,\n      \"payment_method\": \"credit_card\",\n      \"status\": \"successful\",\n      \"amount\": 59.97,\n      \"idempotency_key\": \"abc123-uuid\",\n      \"gateway_transaction_id\": \"txn_123456\",\n      \"failure_reason\": null,\n      \"processed_at\": \"2026-01-01T12:35:00Z\",\n      \"created_at\": \"2026-01-01T12:31:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Payment retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"order_id\": 1,\n    \"payment_method\": \"credit_card\",\n    \"status\": \"successful\",\n    \"amount\": 59.97,\n    \"idempotency_key\": \"abc123-uuid\",\n    \"gateway_transaction_id\": \"txn_123456\",\n    \"failure_reason\": null,\n    \"processed_at\": \"2026-01-01T12:35:00Z\",\n    \"created_at\": \"2026-01-01T12:31:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Payment Methods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/methods",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "methods"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    \"credit_card\",\n    \"paypal\"\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
