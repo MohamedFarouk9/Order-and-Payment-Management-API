@@ -59,7 +59,7 @@ php artisan serve
 
 - `Order-and-Payment-Management-API.postman_collection.json`
 - Set environment variables:
-  - `baseUrl` → `http://localhost:8000`
+  - `baseUrl` → `http://127.0.0.1:8000`
   - `token` → leave empty initially
 - Execute `Register` or `Login`, then use the saved `token` for protected endpoints.
 
@@ -88,7 +88,7 @@ Quick login and use examples:
 - Login (returns a JWT token):
 
 ```bash
-curl -s -X POST http://localhost:8000/api/auth/login \
+curl -s -X POST http://127.0.0.1:8000/api/auth/login \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{"email":"tester@example.com","password":"password"}'
@@ -97,7 +97,7 @@ curl -s -X POST http://localhost:8000/api/auth/login \
 - Use returned token for protected endpoints (replace <token>):
 
 ```bash
-curl -s -X GET http://localhost:8000/api/orders \
+curl -s -X GET http://127.0.0.1:8000/api/orders \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <token>"
 ```
@@ -105,14 +105,14 @@ curl -s -X GET http://localhost:8000/api/orders \
 - Refresh token (Authorization header preferred):
 
 ```bash
-curl -s -X POST http://localhost:8000/api/auth/refresh \
+curl -s -X POST http://127.0.0.1:8000/api/auth/refresh \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <token>"
 ```
 
 Postman notes:
 
-- Import the collection and set `baseUrl` to `http://localhost:8000`.
+- Import the collection and set `baseUrl` to `http://127.0.0.1:8000`.
 - Run the `Login` request with the default tester credentials — the collection saves the JWT into the `token` environment variable for subsequent requests.
 
 ## Payment Gateway Extensibility
