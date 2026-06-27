@@ -77,6 +77,44 @@ Authorization: Bearer <token>
 - `alice@example.com` / `password`
 - `bob@example.com` / `password`
 
+### Default tester account (recommended)
+
+- `tester@example.com` / `password`
+
+This account is created by the seeder for quick manual testing. Use it to log in and exercise protected endpoints.
+
+Quick login and use examples:
+
+- Login (returns a JWT token):
+
+```bash
+curl -s -X POST http://localhost:8000/api/auth/login \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"tester@example.com","password":"password"}'
+```
+
+- Use returned token for protected endpoints (replace <token>):
+
+```bash
+curl -s -X GET http://localhost:8000/api/orders \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer <token>"
+```
+
+- Refresh token (Authorization header preferred):
+
+```bash
+curl -s -X POST http://localhost:8000/api/auth/refresh \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer <token>"
+```
+
+Postman notes:
+
+- Import the collection and set `baseUrl` to `http://localhost:8000`.
+- Run the `Login` request with the default tester credentials — the collection saves the JWT into the `token` environment variable for subsequent requests.
+
 ## Payment Gateway Extensibility
 
 The payment gateway layer is built using a strategy pattern via `App\Services\PaymentGateway\PaymentGatewayManager`.

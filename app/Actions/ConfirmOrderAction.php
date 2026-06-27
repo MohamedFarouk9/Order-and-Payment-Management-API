@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\Order;
+use Illuminate\Support\Facades\Log;
 
 /**
  * ConfirmOrderAction
@@ -24,6 +25,13 @@ class ConfirmOrderAction
     {
         // Authorization check
         if ($order->user_id !== $userId) {
+            // Log details to help debugging when a valid token seems to be present
+            Log::warning('ConfirmOrderAction: unauthorized attempt to confirm order', [
+                'order_id' => $order->id,
+                'order_user_id' => $order->user_id,
+                'requesting_user_id' => $userId,
+            ]);
+
             throw new \Exception('Unauthorized to confirm this order');
         }
 

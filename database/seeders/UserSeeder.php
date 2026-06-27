@@ -19,8 +19,10 @@ class UserSeeder extends Seeder
     {
         $faker = Faker::create();
 
+        // Default stable test user for quick manual testing.
+        // Credentials: tester@example.com / password
         $users = [
-            ['name' => 'Test User', 'email' => 'test@example.com'],
+            ['name' => 'Tester', 'email' => 'tester@example.com'],
             ['name' => 'Alice Smith', 'email' => 'alice@example.com'],
             ['name' => 'Bob Johnson', 'email' => 'bob@example.com'],
         ];

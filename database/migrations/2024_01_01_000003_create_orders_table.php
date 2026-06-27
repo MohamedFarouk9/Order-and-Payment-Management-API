@@ -8,14 +8,6 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
-     * This migration creates the orders table which stores all customer orders.
-     * Each order tracks:
-     * - user_id: The customer who placed the order
-     * - status: Current order state (pending, confirmed, cancelled)
-     * - total_amount: Calculated sum of all items
-     * - items_count: Number of items in the order
-     * - timestamps: Track creation and modification times
      */
     public function up(): void
     {
@@ -27,7 +19,7 @@ return new class extends Migration
             $table->integer('items_count')->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             // Indexes for common queries
             $table->index('user_id');
             $table->index('status');

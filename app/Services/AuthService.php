@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * AuthService
@@ -88,11 +89,17 @@ class AuthService
      *
      * @return string|null
      */
-    public function refreshToken(): ?string
+    public function refreshToken(?string $token = null): ?string
     {
         try {
+            if ($token !== null) {
+                JWTAuth::setToken($token);
+            }
+
             return JWTAuth::refresh();
         } catch (JWTException $e) {
+            // Log the exception for easier debugging when refresh fails
+            Log::error('JWT refresh failed: ' . $e->getMessage());
             return null;
         }
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -106,9 +107,12 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function refresh()
+    public function refresh(Request $request)
     {
-        $token = $this->authService->refreshToken();
+        // Accept token from Authorization header or request body (for testing)
+        $token = $request->bearerToken() ?? $request->input('token');
+
+        $token = $this->authService->refreshToken($token);
 
         if (!$token) {
             return response()->json([
